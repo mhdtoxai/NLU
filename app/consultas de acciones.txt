@@ -1,0 +1,1480 @@
+
+NO Miembros = Preguntas generales / no accionables
+
+Miembros= Preguntas generales / accionables
+
+
+
+crear_credenciales
+
+Palabras relacionadas “mi credencial de afiliado”, “mi tarjeta de socio” “quiero ver mi credencial de miembro”, o similares. Esto solo aplica para los MIEMBROS. Un No Miembro que llegue a pedir credencial, el bot debería tener la capacidad de responder “Lo siento, para obtener tu credencial de miembro debes primero conectar tu Whatsapp con tu perfil de miembro
+
+informacion_beneficios
+
+Palabras “beneficios, descuentos, convenios” que sean solicitados por un MIEMBRO, siempre debe dirigir al apartado de MIS BENEFICIOS (como ya lo tenemos, que muestra los últimos tres y luego “ver más”). Solo que sea un NO-MIEMBRO, entonces sí le debe responder con la lista genérica de beneficios. Esta lista genérica me parece que venía en la información con la que se alimentó el RAG.
+
+solicitud_eventos  
+Palabras “eventos, cursos, capacitación, capacitaciones, congresos, foros, comidas, sesión de consejo, reuniones, reunión, junta de consejo” que sean solicitados por un MIEMBRO, siempre debe dirigir al apartado de MIS EVENTOS dentro del perfil (como ya lo tenemos: que muestra los últimos tres y luego “Ver más”). A menos que sea un NO-MIEMBRO (alguien que no ha conectado su WhatsApp aún), entonces sí le debe responder con la URL que abre el catálogo público de eventos.
+
+informacion_perfil
+¿En qué estatus tengo mi membresía?, ¿en qué estatus está la afiliación?, quiero saber si estoy vigente, quiero saber si estoy al día con mis cuotas, quiero saber si debo mi cuota, quiero saber si tengo adeudo, quiero saber cuándo vence mi membresía, ¿cuándo expira mi afiliación? ¿Cuándo vence mi afiliación?,¿Cuántos días me quedan de mi membresía?, ¿Estoy activo en la Cámara?. 
+
+informacion_comunidad
+Palabras “noticias, comunicados, informes de tesorería, informe de presidencia, informe de secciones, (ojo, NO la palabra “ información”), reportes” que sean solicitados por un MIEMBRO, siempre debe dirigir al apartado de MI COMUNIDAD dentro del perfil (como ya lo tenemos que muestra los últimos tres y luego “Ver más”).  Si lo llega a pedir un NO-MIEMBRO, solamente deberá decir “Te recomendamos seguir las noticias de la Cámara en sus redes sociales”.
+
+
+informacion_membresia
+
+"pagos de membresia" "quiero pagar mi membresia" "quiero información de mi membresía"
+
+
+
+
+bueno:
+def build_prompt() -> str:
+    return """
+Eres el asistente virtual de CANACO SERVYTUR León.
+
+Clasifica cada consulta del usuario en una de las siguientes acciones y responde SOLO con un JSON válido:
+- "mensaje": texto fijo predefinido según la acción.
+- "action": una acción válida.
+
+Acciones válidas:
+- crear_credenciales → cuando el usuario pida o mencione su credencial, tarjeta, carnet o identificación como afiliado, miembro o socio.
+  Ejemplos: "quiero ver mi credencial", "dónde saco mi carnet", "me pueden dar mi identificación", "cómo descargo mi credencial", "enséñame mi tarjeta de socio".
+- informacion_beneficios → cuando el usuario busque beneficios, descuentos, convenios, promociones o ventajas de ser miembro o pertenecer.
+  Ejemplos: "qué beneficios tengo", "qué gano con ser socio", "qué me ofrecen como miembro", "qué promociones hay disponibles", "qué ventajas tengo en la cámara".
+- solicitud_eventos → cuando pregunte por cursos, talleres, capacitaciones, congresos, reuniones o actividades de la cámara, foros, sesion o junta de consejo, comidas, almuerzos, desayunos, cenas, meriendas, postres, colaciones o cualquier intención que implique una reunión.
+  Ejemplos: "qué eventos hay", "cuándo es la próxima junta", "qué actividades vienen", "avísame de la próxima reunión".
+- informacion_perfil → cuando quiera saber su estatus, membresía, afiliación, cuántos días le quedan, vigencia, expiración, vencimiento, días restantes, si está activo, si debe cuotas, si le toca renovar, si tiene adeudos, si debe pagar su membresía, o si sigue siendo socio.
+  Ejemplos: "me toca pagar otra vez?", "sigo dentro?", "ando al corriente?", "todavía pertenezco a la cámara?", "sigo en la nómina?", "me bajaron del barco o sigo adentro?".
+- informacion_membresia → cuando pida información sobre pagos, costos, tarifas, precios, renovación, o detalles generales de su membresía. 
+  Ejemplos: "quiero pagar mi membresía", "cuánto cuesta la membresía", "dónde pago la membresía".
+- informacion_comunidad → cuando pregunte por noticias, comunicados, informes, tesorería, presidencia, secciones, reportes o anuncios oficiales de la cámara.
+  Ejemplos: "qué noticias nuevas hay", "algún aviso nuevo?", "qué novedades hay", "mándame los últimos reportes", "qué anda pasando en la cámara".
+- constancia_miembro → cuando necesite constancia, comprobante o certificado de ser miembro.
+  Ejemplos: "necesito una constancia de socio", "quiero mi comprobante de afiliación", "dame un certificado de que soy miembro".
+- pregunta_general → cuando el mensaje sea vago, no tenga relación clara con los temas anteriores o no se pueda determinar la intención.
+  Ejemplos: "hola", "qué tal", "me puedes ayudar?", "tengo una duda".
+
+Reglas importantes:
+1. El usuario SIEMPRE es miembro, por lo que todas las acciones aplican en modo "accionable".
+2. No dependas solo de palabras clave: identifica la intención aunque esté expresada de forma ambigua o coloquial.  
+   Ejemplo: "me toca pagar otra vez?", "sigo dentro?", "ando al corriente?" → todos corresponden a **informacion_perfil**.
+3. Si la frase encaja en más de una categoría, selecciona la MÁS específica.
+4. Si no encaja claramente en ninguna, responde con **pregunta_general**.
+5. Usa siempre los mensajes fijos predefinidos por categoría (no inventes texto nuevo).
+6. Si el mensaje habla de dinero que **ya debe o que está pendiente**, clasifícalo como **informacion_perfil**.
+7. Si el mensaje habla de dinero que quiere **pagar o conocer el costo**, clasifícalo como **informacion_membresia**.
+
+Mensajes fijos por acción:
+- crear_credenciales → "Estoy generando tu credencial, un momento..."
+- solicitud_eventos → "Un momento, estoy generando solicitud_eventos."
+- informacion_beneficios → "Aquí tienes la información de los beneficios..."
+- informacion_perfil → "Aquí tienes la información de tu perfil..."
+- informacion_membresia → "Aquí tienes la información de tu membresía..."
+- informacion_comunidad → "Aquí tienes la información de tu comunidad..."
+- constancia_miembro → "Aquí tienes tu constancia de miembro..."
+- pregunta_general → "¿En qué puedo ayudarte?"
+"""
+
+
+
+
+
+
+
+
+
+
+antiguo funcional:
+def build_prompt() -> str:
+    return """
+Eres el asistente virtual de CANACO SERVYTUR León.
+
+Clasifica cada consulta del usuario en una de las siguientes acciones y responde SOLO con un JSON válido:
+- "mensaje": texto fijo predefinido según la acción.
+- "action": una acción válida.
+
+Acciones válidas:
+- crear_credenciales → cuando el usuario pida o mencione su credencial, tarjeta, carnet o identificación como socio.
+- informacion_beneficios → cuando el usuario busque beneficios, descuentos, convenios, promociones o ventajas de ser miembro.
+- solicitud_eventos → cuando pregunte por cursos, talleres, capacitaciones, congresos, reuniones o actividades de la cámara.
+- informacion_perfil → cuando quiera saber su estatus, vigencia, si está activo, si debe cuotas, si le toca renovar, si tiene adeudos, si debe pagar o si sigue siendo socio.
+- informacion_membresia → cuando pida información sobre pagos, costos o detalles generales de su membresía.
+- informacion_comunidad → cuando pregunte por noticias, comunicados, informes, reportes o anuncios oficiales de la cámara.
+- constancia_miembro → cuando necesite constancia, comprobante o certificado de ser miembro.
+- pregunta_general → cuando el mensaje sea vago, no tenga relación clara con los temas anteriores o no se pueda determinar la intención.
+
+Reglas importantes:
+1. El usuario SIEMPRE es miembro, por lo que todas las acciones aplican en modo "accionable".
+2. No dependas solo de palabras clave: identifica la intención aunque esté expresada de forma ambigua o coloquial.  
+   Ejemplo: "me toca pagar otra vez?", "sigo dentro?", "ando al corriente?" → todos corresponden a **informacion_perfil**.
+3. Si la frase encaja en más de una categoría, selecciona la MÁS específica.
+4. Si no encaja claramente en ninguna, responde con **pregunta_general**.
+5. Usa siempre los mensajes fijos predefinidos por categoría (no inventes texto nuevo).
+
+Mensajes fijos por acción:
+- crear_credenciales → "Estoy generando tu credencial, un momento..."
+- solicitud_eventos → "Un momento, estoy generando solicitud_eventos."
+- informacion_beneficios → "Aquí tienes la información de los beneficios..."
+- informacion_perfil → "Aquí tienes la información de tu perfil..."
+- informacion_membresia → "Aquí tienes la información de tu membresía..."
+- informacion_comunidad → "Aquí tienes la información de tu comunidad..."
+- constancia_miembro → "Aquí tienes tu constancia de miembro..."
+- pregunta_general → "¿En qué puedo ayudarte?"
+"""
+
+
+
+
+antes de revisarlo
+def build_prompt() -> str:
+    return """
+Eres el asistente virtual de CANACO SERVYTUR León.
+
+Clasifica cada consulta del usuario en una de las siguientes acciones y responde SOLO con un JSON válido:
+- "mensaje": texto fijo predefinido según la acción.
+- "action": una acción válida.
+
+Acciones válidas:
+- crear_credenciales → cuando el usuario pida o mencione su credencial, tarjeta, carnet o identificación como afiliado, miembro o socio.
+  Ejemplos: "quiero ver mi credencial", "dónde saco mi carnet", "me pueden dar mi identificación", "cómo descargo mi credencial", "enséñame mi tarjeta de socio".
+- informacion_beneficios → cuando el usuario busque beneficios, descuentos, convenios, promociones o ventajas de ser miembro o pertenecer.
+  Ejemplos: "qué beneficios tengo", "qué gano con ser socio", "qué me ofrecen como miembro", "qué promociones hay disponibles", "qué ventajas tengo en la cámara".
+- solicitud_eventos → cuando pregunte por cursos, talleres, capacitaciones, congresos, reuniones o actividades de la cámara, foros, sesion o junta de consejo, por comidas o palabras relacionadas con ello, almuerzos, desayunos, cenas, meriendas, postres, colaciones o cualquier intención que implique una reunión.
+  Ejemplos: "qué eventos hay", "cuándo es la próxima junta", "qué actividades vienen", "avísame de la próxima reunión", "hay (palabra relacionada a comida)".
+- informacion_perfil → cuando quiera saber su estatus, membresía, afiliación, cuántos días le quedan, vigencia, expiración, vencimiento, días restantes, si está activo, si debe cuotas, si le toca renovar, si tiene adeudos, si debe pagar su membresía, o si sigue siendo socio o miembro.
+  Ejemplos: "me toca pagar otra vez?", "sigo dentro?", "ando al corriente?", "todavía pertenezco a la cámara?", "sigo en la nómina?", "me bajaron del barco o sigo adentro?", información de socio/estatus/palabras similares.
+- informacion_membresia → cuando pida información sobre pagos, costos, tarifas, precios, renovación, o detalles generales de su membresía. 
+  Ejemplos: "quiero pagar mi membresía", "cuánto cuesta la membresía", "dónde pago la membresía".
+- informacion_comunidad → cuando pregunte por noticias, comunicados, informes, tesorería, presidencia, secciones, reportes o anuncios oficiales de la cámara.
+  Ejemplos: "qué noticias nuevas hay", "algún aviso nuevo?", "qué novedades hay", "mándame los últimos reportes", "qué anda pasando en la cámara".
+- constancia_miembro → cuando necesite constancia, comprobante o certificado de ser miembro.
+  Ejemplos: "necesito una constancia de socio", "quiero mi comprobante de afiliación", "dame un certificado de que soy miembro".
+- pregunta_general → cuando el mensaje sea vago, no tenga relación clara con los temas anteriores o no se pueda determinar la intención.
+  Ejemplos: "hola", "qué tal", "me puedes ayudar?", "tengo una duda".
+
+Reglas importantes:
+1. El usuario SIEMPRE es miembro, por lo que todas las acciones aplican en modo "accionable".
+2. No dependas solo de palabras clave ni solo de los ejemplos: siempre identifica la intención aunque esté expresada de forma muy ambigua, coloquial, abreviada, incompleta o mal escrita.  
+   Ejemplo: "me toca pagar otra vez?", "sigo dentro?", "ando al corriente?" → todos corresponden a **informacion_perfil**.
+3. Ignora palabras de relleno o coloquiales como "qué onda", "qué pex", "oye", "este", "mmm", "aja", "eh" o similares: no cambian la intención del mensaje.
+4. Si la frase encaja en más de una categoría, selecciona la MÁS específica.
+5. Si no encaja claramente en ninguna, responde con **pregunta_general**.
+6. Usa siempre los mensajes fijos predefinidos por categoría (no inventes texto nuevo).
+7. Si el mensaje habla de dinero que **ya debe o que está pendiente**, clasifícalo como **informacion_perfil**.
+8. Si el mensaje habla de dinero que quiere **pagar o conocer el costo**, clasifícalo como **informacion_membresia**.
+
+Mensajes fijos por acción:
+- crear_credenciales → "Estoy generando tu credencial, un momento..."
+- solicitud_eventos → "Un momento, estoy generando solicitud_eventos."
+- informacion_beneficios → "Aquí tienes la información de los beneficios..."
+- informacion_perfil → "Aquí tienes la información de tu perfil..."
+- informacion_membresia → "Aquí tienes la información de tu membresía..."
+- informacion_comunidad → "Aquí tienes la información de tu comunidad..."
+- constancia_miembro → "Aquí tienes tu constancia de miembro..."
+- pregunta_general → "¿En qué puedo ayudarte?"
+"""
+
+
+
+
+
+{
+  "from": "usuario1",
+  "query": "Oye we, me enseñas mi tarjeta esa de socio?"
+}
+
+{
+    "from": "usuario1",
+    "mensaje": "Estoy generando tu credencial, un momento...",
+    "action": "crear_credenciales"
+}
+
+
+{
+  "from": "usuario1",
+  "query": "Dónde descargo mi carnet digital?"
+}
+{
+    "from": "usuario1",
+    "mensaje": "Estoy generando tu credencial, un momento...",
+    "action": "crear_credenciales"
+}
+
+
+{
+  "from": "usuario1",
+  "query": "La tarjeta que se usa pa entrar, dónde la saco?"
+}
+
+{
+    "from": "usuario1",
+    "mensaje": "Estoy generando tu credencial, un momento...",
+    "action": "crear_credenciales"
+}
+
+{
+  "from": "usuario1",
+  "query": "A ver qué promos tengo ahorita?"
+}
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de los beneficios...",
+    "action": "informacion_beneficios"
+}
+{
+  "from": "usuario1",
+  "query": "Qué ventajas hay por ser parte de la cámara?"
+}
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de los beneficios...",
+    "action": "informacion_beneficios"
+}
+
+{
+  "from": "usuario1",
+  "query": "“Hay convenios nuevos pa socios?"
+}
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de los beneficios...",
+    "action": "informacion_beneficios"
+}
+
+{
+  "from": "usuario1",
+  "query": "“Qué habrá mañana?"
+}
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tus eventos...",
+    "action": "solicitud_eventos"
+}
+
+{
+  "from": "usuario1",
+  "query": "Ya pasó el congreso?   omih9pihg"
+}
+
+{
+    "from": "usuario1",
+    "mensaje": "Un momento, estoy generando solicitud_eventos.",
+    "action": "solicitud_eventos"
+}
+
+{
+  "from": "usuario1",
+  "query": "Va a haber junta o algo esta semana?"
+}
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tus eventos...",
+    "action": "solicitud_eventos"
+}
+
+{
+  "from": "usuario1",
+  "query": "Qué onda, cuándo es el desayuno de consejo?"
+}
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tus eventos...",
+    "action": "solicitud_eventos"
+}
+
+{
+  "from": "usuario1",
+  "query": "Sigo activo en la cámara?"
+}
+
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu perfil...",
+    "action": "informacion_perfil"
+}
+
+{
+  "from": "usuario1",
+  "query": "Cuánto debo de la membresía?"
+}
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu perfil...",
+    "action": "informacion_perfil"
+}
+
+{
+  "from": "usuario1",
+  "query": "Ando al corriente o ya debo otra vez?"
+}
+
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu perfil...",
+    "action": "informacion_perfil"
+}
+
+{
+  "from": "usuario1",
+  "query": "Todavía me queda tiempo de socio?"
+}
+
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu perfil...",
+    "action": "informacion_perfil"
+}
+
+{
+  "from": "usuario1",
+  "query": "Quiero pagar mi membresía hoy"
+}
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu membresía...",
+    "action": "informacion_membresia"
+}
+{
+  "from": "usuario1",
+  "query": "Cuánto cuesta renovar este año?"
+}
+
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu perfil...",
+    "action": "informacion_perfil"
+}
+
+{
+  "from": "usuario1",
+  "query": "Cuánto cuesta renovar la membresia este año?"
+}
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu perfil...",
+    "action": "informacion_perfil"
+}
+{
+  "from": "usuario1",
+  "query": "Dónde hago el pago de mi membresía?"
+}
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu perfil...",
+    "action": "informacion_perfil"
+}
+{
+  "from": "usuario1",
+  "query": "Voy a pagar mañana con tarjeta"
+}
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu membresía...",
+    "action": "informacion_membresia"
+}
+
+{
+  "from": "usuario1",
+  "query": "Mándame los reportes de presidencia"
+}
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de las comunidades/noticias/informes...",
+    "action": "informacion_comunidad"
+}
+{
+  "from": "usuario1",
+  "query": "Qué novedades trae la cámara?"
+}
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu comunidad...",
+    "action": "informacion_comunidad"
+}
+
+{
+  "from": "usuario1",
+  "query": "lgún comunicado nuevo de tesorería?"
+}
+
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de las comunidades/noticias/informes...",
+    "action": "informacion_comunidad"
+}
+
+{
+  "from": "usuario1",
+  "query": "Necesito una carta que avale que soy socio"
+}
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes tu constancia de miembro...",
+    "action": "constancia_miembro"
+}
+
+{
+  "from": "usuario1",
+  "query": "Quiero un comprobante de afiliación"
+}
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de la constancia...",
+    "action": "constancia_miembro"
+}
+
+{
+  "from": "usuario1",
+  "query": "Dame mi certificado de que soy miembro"
+}
+
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de la constancia...",
+    "action": "constancia_miembro"
+}
+{
+  "from": "usuario1",
+  "query": "qué onda, jajaja, me puedes ayudar?"
+}
+{
+    "from": "usuario1",
+    "mensaje": "¿En qué puedo ayudarte?",
+    "action": "pregunta_general"
+}
+
+{
+  "from": "usuario1",
+  "query": "mmm ajá, este, tienes info?"
+}
+{
+    "from": "usuario1",
+    "mensaje": "¿En qué puedo ayudarte?",
+    "action": "pregunta_general"
+}
+
+{
+  "from": "usuario1",
+  "query": "..."
+}
+{
+    "from": "usuario1",
+    "mensaje": "¿En qué puedo ayudarte?",
+    "action": "pregunta_general"
+}
+
+
+
+
+
+mas:
+{
+  "from": "usuario1",
+  "query": "me das mi tarjeta de socio"
+}
+{
+    "from": "usuario1",
+    "mensaje": "Estoy generando tu credencial, un momento...",
+    "action": "crear_credenciales"
+}
+
+{
+  "from": "usuario1",
+  "query": "quiero bajar mi carnet"
+}
+
+{
+    "from": "usuario1",
+    "mensaje": "Estoy generando tu credencial, un momento...",
+    "action": "crear_credenciales"
+}
+{
+  "from": "usuario1",
+  "query": "pago con tarjeta la membresía"
+}
+{
+    "from": "usuario1",
+    "mensaje": "Estoy generando tu credencial, un momento...",
+    "action": "crear_credenciales"
+}
+
+{
+  "from": "usuario1",
+  "query": "qué promociones hay ahora mismo"
+}
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de los beneficios...",
+    "action": "informacion_beneficios"
+}
+{
+  "from": "usuario1",
+  "query": "qué ventajas tengo como socio"
+}
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de los beneficios...",
+    "action": "informacion_beneficios"
+}
+{
+  "from": "usuario1",
+  "query": "dan descuento en hoteles?"
+}
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de los beneficios...",
+    "action": "informacion_beneficios"
+}
+{
+  "from": "usuario1",
+  "query": "qué hubo ayer en la cámara"
+}
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tus eventos...",
+    "action": "solicitud_eventos"
+}
+{
+  "from": "usuario1",
+  "query": "hay desayuno de consejo mañana?"
+}
+
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tus eventos...",
+    "action": "solicitud_eventos"
+}
+
+{
+  "from": "usuario1",
+  "query": "me avisas de la próxima junta?"
+}
+
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tus eventos...",
+    "action": "solicitud_eventos"
+}
+
+
+{
+  "from": "usuario1",
+  "query": "dan constancia en el taller?"
+}
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de la constancia...",
+    "action": "constancia_miembro"
+}
+
+{
+  "from": "usuario1",
+  "query": "cuánto debo de mi membresía"
+}
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu perfil...",
+    "action": "informacion_perfil"
+}
+
+{
+  "from": "usuario1",
+  "query": "ando atrasado con los pagos?"
+}
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu perfil...",
+    "action": "informacion_perfil"
+}
+    {
+    "from": "usuario1",
+    "query": "todavía estoy activo como socio?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu perfil...",
+    "action": "informacion_perfil"
+}
+    {
+    "from": "usuario1",
+    "query": "me toca renovar ya?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu perfil...",
+    "action": "informacion_perfil"
+}
+
+    {
+    "from": "usuario1",
+    "query": "quiero pagar mi membresía"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu membresía...",
+    "action": "informacion_membresia"
+}
+
+    {
+    "from": "usuario1",
+    "query": "cuánto cuesta la membresía este año?"
+    }
+
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu membresía...",
+    "action": "informacion_membresia"
+}
+    {
+    "from": "usuario1",
+    "query": "dónde renuevo mi membresía?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu membresía...",
+    "action": "informacion_membresia"
+}
+
+    {
+    "from": "usuario1",
+    "query": "voy a pagar mañana"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu membresía...",
+    "action": "informacion_membresia"
+}
+
+    {
+    "from": "usuario1",
+    "query": "qué novedades hay en la cámara"
+    }
+
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu comunidad...",
+    "action": "informacion_comunidad"
+}
+
+    {
+    "from": "usuario1",
+    "query": "mándame el último reporte de tesorería"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de las comunidades/noticias/informes...",
+    "action": "informacion_comunidad"
+}
+
+    {
+    "from": "usuario1",
+    "query": "hay algún aviso nuevo?"
+    }
+
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de las comunidades/noticias/informes...",
+    "action": "informacion_comunidad"
+}
+    {
+    "from": "usuario1",
+    "query": "quiero una constancia de socio"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de la constancia...",
+    "action": "constancia_miembro"
+}
+    {
+    "from": "usuario1",
+    "query": "me dan un comprobante de afiliación"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de la constancia...",
+    "action": "constancia_miembro"
+}
+    {
+    "from": "usuario1",
+    "query": "ocupo un certificado que diga que soy miembro"
+    }
+
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de la constancia...",
+    "action": "constancia_miembro"
+}
+
+    {
+    "from": "usuario1",
+    "query": "qué onda bro"
+    }
+
+{
+    "from": "usuario1",
+    "mensaje": "¿En qué puedo ayudarte?",
+    "action": "pregunta_general"
+}
+    {
+    "from": "usuario1",
+    "query": "hola, cómo andas"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "¿En qué puedo ayudarte?",
+    "action": "pregunta_general"
+}
+    {
+    "from": "usuario1",
+    "query": "oye una duda"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "¿En qué puedo ayudarte?",
+    "action": "pregunta_general"
+}
+    {
+    "from": "usuario1",
+    "query": "va a haber algo esta semana?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "¿En qué puedo ayudarte?",
+    "action": "pregunta_general"
+}
+
+
+
+    {
+    "from": "usuario1",
+    "query": "qué eventos hay"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Un momento, estoy generando solicitud_eventos.",
+    "action": "solicitud_eventos"
+}
+
+    {
+    "from": "usuario1",
+    "query": "qué onda, me puedes ayudar?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "¿En qué puedo ayudarte?",
+    "action": "pregunta_general"
+}
+
+    {
+    "from": "usuario1",
+    "query": "me toca pagar otra vez?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu perfil...",
+    "action": "informacion_perfil"
+}
+
+
+
+
+
+
+
+
+
+
+    {
+    "from": "usuario1",
+    "query": "Quiero ver mi credencial de socio"
+    }
+
+{
+    "from": "usuario1",
+    "mensaje": "Estoy generando tu credencial, un momento...",
+    "action": "crear_credenciales"
+}
+
+    {
+    "from": "usuario1",
+    "query": "Dónde saco mi carnet de miembro?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Estoy generando tu credencial, un momento...",
+    "action": "crear_credenciales"
+}
+    {
+    "from": "usuario1",
+    "query": "Me pueden dar mi identificación de afiliado?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Estoy generando tu credencial, un momento...",
+    "action": "crear_credenciales"
+}
+    {
+    "from": "usuario1",
+    "query": "“Enséñame mi tarjeta de socio"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Estoy generando tu credencial, un momento...",
+    "action": "crear_credenciales"
+}
+    {
+    "from": "usuario1",
+    "query": "Qué beneficios tengo como socio?"
+    }
+
+    {
+    "from": "usuario1",
+    "query": "Qué beneficios tengo como socio?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de los beneficios...",
+    "action": "informacion_beneficios"
+}
+    {
+    "from": "usuario1",
+    "query": "Mándame los últimos convenios disponibles"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de los beneficios...",
+    "action": "informacion_beneficios"
+}
+    {
+    "from": "usuario1",
+    "query": "Qué promociones hay ahorita?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de los beneficios...",
+    "action": "informacion_beneficios"
+}
+
+    {
+    "from": "usuario1",
+    "query": "Qué eventos hay esta semana?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Un momento, estoy generando solicitud_eventos.",
+    "action": "solicitud_eventos"
+}
+    {
+    "from": "usuario1",
+    "query": "Cuándo es la próxima junta de consejo?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Un momento, estoy generando solicitud_eventos.",
+    "action": "solicitud_eventos"
+}
+    {
+    "from": "usuario1",
+    "query": "Avísame de la próxima reunión"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Un momento, estoy generando solicitud_eventos.",
+    "action": "solicitud_eventos"
+}
+    {
+    "from": "usuario1",
+    "query": "Qué capacitaciones vienen pronto?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Un momento, estoy generando solicitud_eventos.",
+    "action": "solicitud_eventos"
+}
+
+    {
+    "from": "usuario1",
+    "query": "Estoy vigente en la cámara?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu perfil...",
+    "action": "informacion_perfil"
+}
+    {
+    "from": "usuario1",
+    "query": "Quiero saber si estoy al día con mis cuotas"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu perfil...",
+    "action": "informacion_perfil"
+}
+    {
+    "from": "usuario1",
+    "query": "Cuántos días me quedan de membresía?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu perfil...",
+    "action": "informacion_perfil"
+}
+    {
+    "from": "usuario1",
+    "query": "Tengo adeudo pendiente?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu perfil...",
+    "action": "informacion_perfil"
+}
+    {
+    "from": "usuario1",
+    "query": "Mi afiliación ya venció?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu perfil...",
+    "action": "informacion_perfil"
+}
+    {
+    "from": "usuario1",
+    "query": "Mándame el último informe de presidencia"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de las comunidades/noticias/informes...",
+    "action": "informacion_comunidad"
+}
+    {
+    "from": "usuario1",
+    "query": "Qué comunicados nuevos hay?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de las comunidades/noticias/informes...",
+    "action": "informacion_comunidad"
+}
+    {
+    "from": "usuario1",
+    "query": "Quiero ver los reportes de tesorería"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de las comunidades/noticias/informes...",
+    "action": "informacion_comunidad"
+}
+    {
+    "from": "usuario1",
+    "query": "Quiero pagar mi membresía"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu membresía...",
+    "action": "informacion_membresia"
+}
+    {
+    "from": "usuario1",
+    "query": "Cuánto cuesta la membresía de este año?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu membresía...",
+    "action": "informacion_membresia"
+}
+    {
+    "from": "usuario1",
+    "query": "Cómo renuevo mi membresía?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu membresía...",
+    "action": "informacion_membresia"
+}
+    {
+    "from": "usuario1",
+    "query": "Dónde pago mi membresía?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu perfil...",
+    "action": "informacion_perfil"
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    {
+    "from": "usuario1",
+    "query": "Dónde pago mi membresía?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu membresía...",
+    "action": "informacion_membresia"
+}
+
+    {
+    "from": "usuario1",
+    "query": "Quiero ver mi credencial de socio"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Estoy generando tu credencial, un momento...",
+    "action": "crear_credenciales"
+}
+
+    {
+    "from": "usuario1",
+    "query": "Dónde saco mi carnet?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Estoy generando tu credencial, un momento...",
+    "action": "crear_credenciales"
+}
+
+    {
+    "from": "usuario1",
+    "query": "Enséñame mi tarjeta de socio"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Estoy generando tu credencial, un momento...",
+    "action": "crear_credenciales"
+}
+    {
+    "from": "usuario1",
+    "query": "Me puedes dar mi badge de miembro?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Estoy generando tu credencial, un momento...",
+    "action": "crear_credenciales"
+}
+    {
+    "from": "usuario1",
+    "query": "Oye, me toca pagar la credencial otra vez?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu membresía...",
+    "action": "informacion_membresia"
+}
+
+    {
+    "from": "usuario1",
+    "query": "Quiero pagar mi membresía"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu membresía...",
+    "action": "informacion_membresia"
+}
+    {
+    "from": "usuario1",
+    "query": "Cuánto cuesta la cuota de este año?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu membresía...",
+    "action": "informacion_membresia"
+}
+    {
+    "from": "usuario1",
+    "query": "Dónde renuevo mi credencial?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Estoy generando tu credencial, un momento...",
+    "action": "crear_credenciales"
+}
+    {
+    "from": "usuario1",
+    "query": "Pagar inscripción de socio"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu membresía...",
+    "action": "informacion_membresia"
+}
+    {
+    "from": "usuario1",
+    "query": "Cómo abono lo pendiente de la membresía?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu membresía...",
+    "action": "informacion_membresia"
+}
+    {
+    "from": "usuario1",
+    "query": "Necesito una constancia de socio"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de la constancia...",
+    "action": "constancia_miembro"
+}
+    {
+    "from": "usuario1",
+    "query": "Me pueden dar un comprobante de afiliación?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de la constancia...",
+    "action": "constancia_miembro"
+}
+
+    {
+    "from": "usuario1",
+    "query": "Quiero un certificado de que soy miembro activo"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de la constancia...",
+    "action": "constancia_miembro"
+}
+    {
+    "from": "usuario1",
+    "query": "Dónde bajo mi acreditación escrita?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Estoy generando tu credencial, un momento...",
+    "action": "crear_credenciales"
+}
+    {
+    "from": "usuario1",
+    "query": "Pasen el documento que avala que soy socio    "
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Estoy generando tu credencial, un momento...",
+    "action": "crear_credenciales"
+}
+    {
+    "from": "usuario1",
+    "query": "Qué eventos hay esta semana?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Estoy generando tu credencial, un momento...",
+    "action": "crear_credenciales"
+}
+    {
+    "from": "usuario1",
+    "query": "Avísame de la próxima junta de consejo"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Un momento, estoy generando solicitud_eventos.",
+    "action": "solicitud_eventos"
+}
+    {
+    "from": "usuario1",
+    "query": "Hay capacitaciones disponibles?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Un momento, estoy generando solicitud_eventos.",
+    "action": "solicitud_eventos"
+}
+    {
+    "from": "usuario1",
+    "query": "Cuándo será el próximo congreso?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Un momento, estoy generando solicitud_eventos.",
+    "action": "solicitud_eventos"
+}
+    {
+    "from": "usuario1",
+    "query": "Oye qué onda, vienen talleres o algo así?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Un momento, estoy generando solicitud_eventos.",
+    "action": "solicitud_eventos"
+}
+    {
+    "from": "usuario1",
+    "query": "Qué beneficios tengo como socio?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de los beneficios...",
+    "action": "informacion_beneficios"
+}
+    {
+    "from": "usuario1",
+    "query": "Mándame los convenios vigentes"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de los beneficios...",
+    "action": "informacion_beneficios"
+}
+    {
+    "from": "usuario1",
+    "query": "Hay promociones nuevas?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de los beneficios...",
+    "action": "informacion_beneficios"
+}
+    {
+    "from": "usuario1",
+    "query": "Qué alianzas con empresas tenemos?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de los beneficios...",
+    "action": "informacion_beneficios"
+}
+    {
+    "from": "usuario1",
+    "query": "Me dices los descuentos actuales?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de los beneficios...",
+    "action": "informacion_beneficios"
+}
+    {
+    "from": "usuario1",
+    "query": "Mándame el último informe de presidencia"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de las comunidades/noticias/informes...",
+    "action": "informacion_comunidad"
+}
+    {
+    "from": "usuario1",
+    "query": "Qué comunicados nuevos hay?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de las comunidades/noticias/informes...",
+    "action": "informacion_comunidad"
+}
+
+    {
+    "from": "usuario1",
+    "query": "Quiero ver los reportes de tesorería"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de las comunidades/noticias/informes...",
+    "action": "informacion_comunidad"
+}
+    {
+    "from": "usuario1",
+    "query": "Hay algún aviso reciente?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de las comunidades/noticias/informes...",
+    "action": "informacion_comunidad"
+}
+    {
+    "from": "usuario1",
+    "query": "Enséñame el boletín más actualizado"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de las comunidades/noticias/informes...",
+    "action": "informacion_comunidad"
+}
+    {
+    "from": "usuario1",
+    "query": "Estoy vigente en la cámara?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu perfil...",
+    "action": "informacion_perfil"
+}
+    {
+    "from": "usuario1",
+    "query": "Quiero saber si estoy al día con mis cuotas"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu perfil...",
+    "action": "informacion_perfil"
+}
+    {
+    "from": "usuario1",
+    "query": "Cuántos días me quedan de membresía?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu perfil...",
+    "action": "informacion_perfil"
+}
+    {
+    "from": "usuario1",
+    "query": "Tengo algún adeudo pendiente?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu perfil...",
+    "action": "informacion_perfil"
+}
+    {
+    "from": "usuario1",
+    "query": "Mi afiliación ya venció?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu perfil...",
+    "action": "informacion_perfil"
+}
+    {
+    "from": "usuario1",
+    "query": "Oye bro, mi cuenta sigue activa?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu perfil...",
+    "action": "informacion_perfil"
+}
+
+
+
+
+    {
+    "from": "usuario1",
+    "query": "Dónde pago mi membresía?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu membresía...",
+    "action": "informacion_membresia"
+}
+    {
+    "from": "usuario1",
+    "query": "Dónde renuevo mi credencial?"
+    }
+    {
+    "from": "usuario1",
+    "query": "Dónde renuevo mi credencial?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Estoy generando tu credencial, un momento...",
+    "action": "crear_credenciales"
+}
+    {
+    "from": "usuario1",
+    "query": "Quiero ver mi credencial de socio"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Estoy generando tu credencial, un momento...",
+    "action": "crear_credenciales"
+}
+    {
+    "from": "usuario1",
+    "query": "Dónde bajo mi acreditación escrita?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de la constancia...",
+    "action": "constancia_miembro"
+}
+    {
+    "from": "usuario1",
+    "query": "Pasen el documento que avala que soy socio"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de la constancia...",
+    "action": "constancia_miembro"
+}
+    {
+    "from": "usuario1",
+    "query": "Qué eventos hay esta semana?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Un momento, estoy generando solicitud_eventos.",
+    "action": "solicitud_eventos"
+}
+    {
+    "from": "usuario1",
+    "query": "Qué beneficios tengo como socio?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de los beneficios...",
+    "action": "informacion_beneficios"
+}
+    {
+    "from": "usuario1",
+    "query": "Mándame el último informe de presidencia"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de los beneficios...",
+    "action": "informacion_beneficios"
+}
+    {
+    "from": "usuario1",
+    "query": "Estoy vigente en la cámara?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu perfil...",
+    "action": "informacion_perfil"
+}
+
+
+
+
+
+    {
+    "from": "usuario1",
+    "query": "Dónde renuevo mi credencial?"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Estoy generando tu credencial, un momento...",
+    "action": "crear_credenciales"
+}
+    {
+    "from": "usuario1",
+    "query": "Mándame el último informe de presidencia
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de las comunidades/noticias/informes...",
+    "action": "informacion_comunidad"
+}
+    {
+    "from": "usuario1",
+    "query": "Pasen el documento que avala que soy socio"
+    }
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de la constancia...",
+    "action": "constancia_miembro"
+}

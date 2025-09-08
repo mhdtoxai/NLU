@@ -1,0 +1,82 @@
+{
+  "from": "usuario1",
+  "query": "ye oye, y si sigo en la lista VIP o ya me sacaron de la cámara jajaja"
+}
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu perfil...",
+    "action": "informacion_perfil"
+}
+{
+  "from": "usuario1",
+  "query": "brooo, me toca otro plastiquito dorado o qué onda con mi membresía?"
+}
+{
+    "from": "usuario1",
+    "mensaje": "Estoy generando tu credencial, un momento...",
+    "action": "crear_credenciales"
+}
+{
+  "from": "usuario1",
+  "query": "y los descuentazos locos siguen vigentes o ya me los volaron?"
+}
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de los beneficios...",
+    "action": "informacion_beneficios"
+}
+
+{
+  "from": "usuario1",
+  "query": "hay pachanga o evento formalito de esos con corbata esta semana?"
+}
+{
+    "from": "usuario1",
+    "mensaje": "Un momento, estoy generando solicitud_eventos.",
+    "action": "solicitud_eventos"
+}
+{
+  "from": "usuario1",
+  "query": "dame mi papelito mágico que diga que sí soy socio oficial, plis"
+}
+
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes tu constancia de miembro...",
+    "action": "constancia_miembro"
+}
+
+{
+  "from": "usuario1",
+  "query": "oye compa, sigo activo en la familia empresarial o ya me borraron del padrino de socios"
+}
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu perfil...",
+    "action": "informacion_perfil"
+}
+
+
+
+{
+  "from": "usuario1",
+  "query": "oye carnal, sigo en la nómina de socios o ya me bajaron del barco?"
+}
+
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu perfil...",
+    "action": "informacion_perfil"
+}
+
+
+{
+  "from": "usuario1",
+  "query": "oye carnal, sigo en el barco?"
+}
+
+{
+    "from": "usuario1",
+    "mensaje": "Aquí tienes la información de tu perfil...",
+    "action": "informacion_perfil"
+}
