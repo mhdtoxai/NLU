@@ -2,3 +2,59 @@
 __pycache__/
 *.pyc
 .vscode/
+
+# Byte-compiled / cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+.env/
+.venv/
+env/
+ENV/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# PyInstaller
+*.spec
+
+# Logs
+*.log
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# Coverage / testing
+htmlcov/
+.coverage
+.pytest_cache/
+.tox/
+.nox/
+app/configuracion_modelos_ayuda.py
+# Ignorar todos los __pycache__ en cualquier carpeta
+**/__pycache__/
+
+# Ignorar todos los archivos .pyc
+*.py[cod]
+
+# Ignorar todos los archivos .txt
+*.txt
