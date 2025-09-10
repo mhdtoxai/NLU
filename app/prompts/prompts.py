@@ -20,18 +20,18 @@ Reglas estrictas de salida:
 7. Analiza la consulta **cláusula por cláusula** si hay múltiples intenciones.
 8. Selecciona la categoría **más específica y fuerte** según la jerarquía:
    constancia_miembro > crear_credenciales > informacion_perfil > informacion_membresia > informacion_beneficios > solicitud_eventos > informacion_comunidad > pregunta_general
-9. Palabras clave mínimas o ultra cortas pueden ser suficientes si son fuertes (ej.: "cena" → solicitud_eventos, "sigo dentro?" → informacion_perfil).
+9. Palabras clave mínimas o ultra cortas pueden ser suficientes si son fuertes (ej.: "cena" → solicitud_eventos, "sigo dentro?" → informacion_perfil, "sigo vivo?" → informacion_perfil).
 10. Ambigüedad temporal solo afecta a solicitud_eventos si no hay palabra clave fuerte.
 11. Pagos:
-    - Dinero pendiente o adeudo → informacion_perfil
-    - Pago voluntario, costo, tarifa o lugar de pago → informacion_membresia
+    - Consultas sobre adeudos pendientes, dinero que debe o cuotas vencidas → informacion_perfil
+    - Consultas sobre cómo pagar, dónde pagar, cuánto cuesta o renovación de la membresía → informacion_membresia
 12. Reconoce jerga, sinónimos y expresiones mal escritas, abreviaciones y errores tipográficos.
 13. Reglas y límites claros por categoría (interpretación de intención completa):
     - **constancia_miembro**: cualquier consulta sobre constancias de socio, afiliación o membrecía, incluyendo frases mal escritas o cortas → asignar siempre a esta categoría.
     - **crear_credenciales**: cualquier consulta sobre credenciales, tarjetas, carnets, identificaciones de miembro, incluso mal escrita o coloquial → asignar siempre a esta categoría.
     - **informacion_beneficios**: cualquier consulta sobre beneficios, descuentos, convenios, promociones de miembro, o expresiones coloquiales como "quiero mis beneficios" → asignar siempre a esta categoría.
     - **solicitud_eventos**: cualquier consulta sobre eventos, cursos, capacitaciones, congresos, foros, reuniones, cenas, juntas de consejo, incluso si la frase es breve o mal escrita → asignar siempre a esta categoría.
-    - **informacion_perfil**: cualquier consulta sobre estado de membresía, vigencia, cuotas, adeudos, vencimiento, días restantes, estar activo o no → asignar siempre a esta categoría.
+    - **informacion_perfil**: cualquier consulta sobre estado de membresía, vigencia, cuotas, adeudos, vencimiento, días restantes, estar activo o no, o frases cortas ambiguas que puedan indicar estatus del miembro → asignar siempre a esta categoría.
     - **informacion_membresia**: cualquier consulta sobre pagos, tarifas, costos, renovación de membresía, incluso mal escrita o abreviada → asignar siempre a esta categoría.
     - **informacion_comunidad**: cualquier consulta sobre noticias, comunicados, informes, reportes, avisos de la cámara, incluso mal escrita o corta → asignar siempre a esta categoría.
 14. En conflictos entre múltiples posibles categorías o tiempos, prioriza la **más específica según jerarquía**.
@@ -77,4 +77,5 @@ Ejemplos límite:
 23. "sigo activo? y cuanto debo pagar?" → informacion_perfil
 24. "quiero ver los últimos comunicados" → informacion_comunidad
 25. "quiero mis beneficios y descuentos" → informacion_beneficios
+26. "sigo vivo?" → informacion_perfil
 """
