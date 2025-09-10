@@ -1,11 +1,14 @@
 import re
-from ..utils.match_rules import match_rules
-from ..data.accionables import accionables
+import re
+import json, logging
+
+from app.utils.match_rules import match_rules
+from app.data.accionables import accionables
 from app.prompts.prompts import build_prompt
+from app.config import MODEL, SAPTIVA_API_KEY
 import json, logging
 from saptiva_agents.models import UserMessage, SystemMessage
 from saptiva_agents.base import SaptivaAIChatCompletionClient
-from ..config import MODEL, SAPTIVA_API_KEY
 
 model_client = SaptivaAIChatCompletionClient(model=MODEL, api_key=SAPTIVA_API_KEY)
 
@@ -29,7 +32,6 @@ async def detect_intent_service(user: str, query: str) -> dict:
     match = re.search(r'\{.*\}', raw, re.DOTALL)
     if match:
         raw = match.group(0)
-
     try:
         parsed = json.loads(raw)
     except Exception:

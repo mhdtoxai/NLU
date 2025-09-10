@@ -1,8 +1,9 @@
 """
 Punto de entrada principal de la API FastAPI.
 """
+from app.services.intent_service import detect_intent_service
+
 from fastapi import FastAPI, Request
-from .services.intent_service import detect_intent_service
 
 app = FastAPI(title="CANACO-BOT", description="API de clasificación de intenciones con Saptiva")
 
