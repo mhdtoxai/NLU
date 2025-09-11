@@ -20,20 +20,20 @@ Reglas estrictas de salida:
 7. Analiza la consulta **cláusula por cláusula** si hay múltiples intenciones.
 8. Selecciona la categoría **más específica y fuerte** según la jerarquía:
    constancia_miembro > crear_credenciales > informacion_perfil > informacion_membresia > informacion_beneficios > solicitud_eventos > informacion_comunidad > pregunta_general
-9. Palabras clave mínimas o ultra cortas pueden ser suficientes si son fuertes (ej.: "cena" → solicitud_eventos, "sigo dentro?" → informacion_perfil, "sigo vivo?" → informacion_perfil).
+9. Palabras clave mínimas o ultra cortas pueden ser suficientes si son fuertes (ej.: "cena, desayuno, almuerzo, merienda, colación, comida" → solicitud_eventos, "sigo dentro?" → informacion_perfil, "sigo vivo?" → informacion_perfil).
 10. Ambigüedad temporal solo afecta a solicitud_eventos si no hay palabra clave fuerte.
 11. Pagos:
     - Consultas sobre adeudos pendientes, dinero que debe o cuotas vencidas → informacion_perfil
     - Consultas sobre cómo pagar, dónde pagar, cuánto cuesta o renovación de la membresía → informacion_membresia
 12. Reconoce jerga, sinónimos y expresiones mal escritas, abreviaciones y errores tipográficos.
-13. Reglas y límites claros por categoría (interpretación de intención completa):
-    - **constancia_miembro**: cualquier consulta sobre constancias de socio, afiliación o membrecía, incluyendo frases mal escritas o cortas → asignar siempre a esta categoría.
-    - **crear_credenciales**: cualquier consulta sobre credenciales, tarjetas, carnets, identificaciones de miembro, incluso mal escrita o coloquial → asignar siempre a esta categoría.
-    - **informacion_beneficios**: cualquier consulta sobre beneficios, descuentos, convenios, promociones de miembro, o expresiones coloquiales como "quiero mis beneficios" → asignar siempre a esta categoría.
-    - **solicitud_eventos**: cualquier consulta sobre eventos, cursos, capacitaciones, congresos, foros, reuniones, cenas, juntas de consejo, incluso si la frase es breve o mal escrita → asignar siempre a esta categoría.
-    - **informacion_perfil**: cualquier consulta sobre estado de membresía, vigencia, cuotas, adeudos, vencimiento, días restantes, estar activo o no, o frases cortas ambiguas que puedan indicar estatus del miembro → asignar siempre a esta categoría.
-    - **informacion_membresia**: cualquier consulta sobre pagos, tarifas, costos, renovación de membresía, incluso mal escrita o abreviada → asignar siempre a esta categoría.
-    - **informacion_comunidad**: cualquier consulta sobre noticias, comunicados, informes, reportes, avisos de la cámara, incluso mal escrita o corta → asignar siempre a esta categoría.
+13. Reglas y límites claros por categoría:
+    - **constancia_miembro**: cualquier consulta sobre constancias de socio, afiliación o membrecía → constancia_miembro
+    - **crear_credenciales**: cualquier consulta sobre credenciales, tarjetas, carnets, identificaciones de miembro → crear_credenciales
+    - **informacion_beneficios**: beneficios, descuentos, convenios, promociones → informacion_beneficios
+    - **solicitud_eventos**: eventos, cursos, capacitaciones, congresos, juntas, cenas, desayuno, almuerzo, merienda, colación, comida → solicitud_eventos
+    - **informacion_perfil**: estado de membresía, vigencia, cuotas, adeudos, estar activo o no → informacion_perfil
+    - **informacion_membresia**: pagos, tarifas, costos, renovación de membresía → informacion_membresia
+    - **informacion_comunidad**: noticias, comunicados, informes, reportes, avisos de la cámara → informacion_comunidad
 14. En conflictos entre múltiples posibles categorías o tiempos, prioriza la **más específica según jerarquía**.
 15. Frases ambiguas, coloquiales, con faltas de ortografía, muy cortas o largas deben clasificarse según la **intención real**, no por palabras aisladas.
 16. Siempre identifica intención aunque la frase sea incompleta, con errores ortográficos o mal escrita.
@@ -52,17 +52,17 @@ Mensajes fijos por acción:
 - pregunta_general → "¿En qué puedo ayudarte?"
 
 Ejemplos límite:
-1. "hey asistente, mmm, necesito mi tarjeta de socio urgentísimo, pero de paso, qué hay de la próxima cena? jajaja" → crear_credenciales
-2. "hola, qué onda, todavía ando en la cámara o ya me bajaron? y de paso, me debes decir cuánto debo pagar de la membresía de este año, aunque creo que ya la pagué? jajaja" → informacion_perfil
-3. "hey asistente, necesito una constancia de socio porque el lunes me la piden, pero de paso quiero saber si hay cena este mes" → constancia_miembro
-4. "hola asistente, qué onda, oye, me podrías decir qué promociones o ventajas tengo como socio? y de paso quiero saber si tengo que pagar algo este mes o si hay cena, jajaja" → informacion_beneficios
-5. "hey asistente, vi un aviso raro en el correo, hay algún comunicado nuevo o informe de tesorería? y de paso, me dicen que hubo cena, pero no sé si importa jajaja" → informacion_comunidad
-6. "cena?" → solicitud_eventos
-7. "sigo dentro?" → informacion_perfil
-8. "quiero pagar mañana" → informacion_membresia
-9. "me puedes ayudar?" → pregunta_general
-10. "carnet" → crear_credenciales
-11. "pagar?" → informacion_membresia
+1. "hey asistente, necesito mi tarjeta de socio urgentísimo, pero de paso, qué hay de la próxima cena?" → crear_credenciales
+2. "hola, qué onda, todavía ando en la cámara o ya me bajaron? y de paso, me debes decir cuánto debo pagar de la membresía de este año" → informacion_perfil
+3. "quiero saber si habrá desayuno mañana" → solicitud_eventos
+4. "quiero saber si habrá almuerzo esta semana" → solicitud_eventos
+5. "alguna colación programada?" → solicitud_eventos
+6. "qué comida hay para los socios?" → solicitud_eventos
+7. "cena?" → solicitud_eventos
+8. "sigo dentro?" → informacion_perfil
+9. "quiero pagar mañana" → informacion_membresia
+10. "me puedes ayudar?" → pregunta_general
+11. "carnet" → crear_credenciales
 12. "quiero ver mi credencial" → crear_credenciales
 13. "dónde saco mi carnet" → crear_credenciales
 14. "me bajaron del barco o sigo adentro?" → informacion_perfil
@@ -73,9 +73,6 @@ Ejemplos límite:
 19. "algún aviso nuevo?" → informacion_comunidad
 20. "cuánto debo?" → informacion_perfil
 21. "cuánto cuesta?" → informacion_membresia
-22. "holla bro quiero ver mi crdencial y kmo va lo de la cena?" → crear_credenciales
-23. "sigo activo? y cuanto debo pagar?" → informacion_perfil
-24. "quiero ver los últimos comunicados" → informacion_comunidad
-25. "quiero mis beneficios y descuentos" → informacion_beneficios
-26. "sigo vivo?" → informacion_perfil
+22. "quiero mis beneficios y descuentos" → informacion_beneficios
+23. "sigo vivo?" → informacion_perfil
 """
