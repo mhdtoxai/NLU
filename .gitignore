@@ -1,0 +1,52 @@
+# Entorno virtual
+.venv/
+venv/
+env/
+ENV/
+
+# Archivos de Python compilados
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Archivos de configuración locales
+.env
+app/configuracion_modelos_ayuda.py
+
+# Distribución / empaquetado
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# PyInstaller
+*.spec
+
+# Logs
+*.log
+
+# IDEs y editores
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Coverage / testing
+htmlcov/
+.coverage
+.pytest_cache/
+.tox/
+.nox/
+
+# Ignorar todos los __pycache__ en cualquier carpeta
+**/__pycache__/
+
+# Ignorar todos los archivos .txt (opcional, solo si quieres)
+*.txt
